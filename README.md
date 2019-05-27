@@ -19,7 +19,13 @@ Please Do This ...
 .
 .
 .
-LCD_Init(16,2); // LCD_Init(20,4);
-LCD_Puts(0,0,"TEST");
-
+int main()
+{
+  .
+  .
+  LCD_Init(16,2); // LCD_Init(20,4);
+  LCD_Puts(0,0,"TEST");
+  .
+  .
+}
 ```
