@@ -1,4 +1,4 @@
-# LCD-Character Library for STM32 HAL
+# 4 Pins LCD-Character Library for STM32 HAL
 #### Convertd https://github.com/MaJerle library to HAL
 <br />
  I use Stm32f103c8 and Keil Compiler and Stm32CubeMX wizard.
