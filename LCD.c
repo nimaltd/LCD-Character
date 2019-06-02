@@ -101,8 +101,7 @@ void LCD_Init(uint8_t cols, uint8_t rows)
   gpio.Pin = _LCD_D7_PIN;
   HAL_GPIO_Init(_LCD_D7_PORT,&gpio);
   
-	/* At least 40ms */
-	while(HAL_GetTick()<50)
+	while(HAL_GetTick()<200)
     LCD_Delay_ms(1);
 	/* Set LCD width and height */
 	LCD_Opts.Rows = rows;

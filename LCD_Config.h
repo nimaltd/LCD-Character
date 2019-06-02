@@ -6,7 +6,7 @@
 +++   Nima Askari
 +++   www.github.com/NimaLTD
 +++   www.instagram.com/github.NimaLTD 
-+++   Version: 1.0.0
++++   Version: 1.0.1
 */
 
 #define _LCD_USE_FREERTOS 1
