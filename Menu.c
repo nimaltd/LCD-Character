@@ -8,6 +8,7 @@
 typedef struct
 {
   uint32_t  Time;
+  uint8_t   Refresh;
   uint8_t   Inited;
   void      (*CurrentCallback)(Menu_Key_t); 
   char      *VolatileText;
@@ -24,7 +25,12 @@ typedef struct
 
   uint8_t     VerMenu_Selected;    
   uint8_t     VerMenu_ItemsCnt;
-  uint8_t     VerMenu_Refresh;
+  
+  int32_t     Adjust_Val_int32;
+  int32_t     Adjust_Min_int32;
+  int32_t     Adjust_Max_int32;
+  int32_t     Adjust_Step_int32;
+  uint8_t     Adjust_LCD_Pos;
   
 }Menu_t;
 
@@ -106,7 +112,10 @@ void  Menu_Loop(void)
     //########################
     case Menu_CurrentMode_VolatileText:
       if(strcmp(Menu.Buffer,Menu.VolatileText)!=0)
+        Menu.Refresh=1;
+      if(Menu.Refresh==1)
       {
+        Menu.Refresh=0;
         memset(Menu.Buffer,0,sizeof(Menu.Buffer));
         strncpy(Menu.Buffer,Menu.VolatileText,sizeof(Menu.Buffer));
         LCD_Puts(0,0,Menu.VolatileText);
@@ -122,7 +131,7 @@ void  Menu_Loop(void)
         if(Menu.VerMenu_Selected > 0)
         {
           Menu.VerMenu_Selected--;
-          Menu.VerMenu_Refresh=1;
+          Menu.Refresh=1;
         }
       }
       if(Menu.KeyPressed == Menu_Key_Down)
@@ -130,12 +139,12 @@ void  Menu_Loop(void)
         if (Menu.VerMenu_Selected<Menu.VerMenu_ItemsCnt-1)
         {
           Menu.VerMenu_Selected++;
-          Menu.VerMenu_Refresh=1;
+          Menu.Refresh=1;
         }        
       }    
-      if(Menu.VerMenu_Refresh == 1)
+      if(Menu.Refresh == 1)
       {
-        Menu.VerMenu_Refresh=0;
+        Menu.Refresh=0;
         uint8_t p=Menu.VerMenu_Selected/_LCD_ROWS;
         uint8_t s=Menu.VerMenu_Selected%_LCD_ROWS;
         for(uint8_t r=0; r<_LCD_ROWS ; r++)
@@ -144,7 +153,7 @@ void  Menu_Loop(void)
             LCD_Puts(i,r," ");          
           LCD_Puts(1,r,Menu.ItemsText[p*_LCD_ROWS+r]);          
         }
-        if(p>0)
+        if(Menu.VerMenu_Selected>0)
           LCD_PutCustom(_LCD_COLS-1,0,5);//up arrow
         else
           LCD_Puts(_LCD_COLS-1,0," ");
@@ -162,11 +171,43 @@ void  Menu_Loop(void)
       }      
     break;
     //########################
-  }  
-  if(Menu.CurrentCallback!=NULL)
-    Menu.CurrentCallback(Menu.KeyPressed);    
+    case Menu_CurrentMode_Adjust_int32:
+      if(Menu.KeyPressed == Menu_Key_Up)
+      {
+        if(Menu.Adjust_Val_int32 < Menu.Adjust_Max_int32)
+        {
+          Menu.Adjust_Val_int32 += Menu.Adjust_Step_int32;
+          Menu.Refresh=1;
+        }
+      }
+      if(Menu.KeyPressed == Menu_Key_Down)
+      {
+        if(Menu.Adjust_Val_int32 > Menu.Adjust_Min_int32)
+        {
+          Menu.Adjust_Val_int32 -= Menu.Adjust_Step_int32;
+          Menu.Refresh=1;
+        }
+      }   
+      if(Menu.Refresh == 1)
+      {
+        Menu.Refresh=0;
+        for(uint8_t i=0;i<6;i++)
+          LCD_Puts(Menu.Adjust_LCD_Pos+i,1," ");
+        char  str[8];
+        sprintf(str,"%d",Menu.Adjust_Val_int32);
+        LCD_Puts(Menu.Adjust_LCD_Pos,1,str);        
+      }
+    break;  
+    //########################
+    
+    //########################
+    
+    //########################
+  }     
   if(Menu.KeyPressed != Menu_Key_None)
   {
+    if(Menu.CurrentCallback!=NULL)
+      Menu.CurrentCallback(Menu.KeyPressed); 
     #if (_MENU_BEEP_ENABLE==1)
     HAL_GPIO_WritePin(_MENU_BEEP_GPIO,_MENU_BEEP_PIN,GPIO_PIN_SET);
     LCD_Delay_ms(20);
@@ -176,14 +217,14 @@ void  Menu_Loop(void)
   }
 }
 //####################################################################################################
-void  Menu_DeleteCurrent(void)
+void  Menu_Delete(void)
 {
   Menu.CurrentCallback = NULL;  
   LCD_Clear();
   Menu.CurrentMode = Menu_CurrentMode_None;
 }
 //####################################################################################################
-void  Menu_CreateStaticText(void callback(Menu_Key_t),const char *text)
+void  Menu_StaticTextCreate(void callback(Menu_Key_t),const char *text)
 {
   LCD_Clear();
   LCD_Puts(0,0,(char*)text);
@@ -191,7 +232,7 @@ void  Menu_CreateStaticText(void callback(Menu_Key_t),const char *text)
   Menu.CurrentCallback = callback;
 }
 //####################################################################################################
-void  Menu_CreateVolatileText(void callback(Menu_Key_t),char *text)
+void  Menu_VolatileTextCreate(void callback(Menu_Key_t),char *text)
 {
   LCD_Clear();
   Menu.VolatileText = text;
@@ -202,7 +243,7 @@ void  Menu_CreateVolatileText(void callback(Menu_Key_t),char *text)
   Menu.CurrentCallback = callback;  
 }
 //####################################################################################################
-void  Menu_CreateScrollingVertical(void callback(Menu_Key_t),uint8_t ItemsCnt,...)
+void  Menu_ScrollingVerticalCreate(void callback(Menu_Key_t),uint8_t ItemsCnt,...)
 {
   va_list tag;
   va_start (tag,ItemsCnt);
@@ -216,14 +257,42 @@ void  Menu_CreateScrollingVertical(void callback(Menu_Key_t),uint8_t ItemsCnt,..
   va_end (tag);  
   Menu.VerMenu_ItemsCnt = ItemsCnt;
   Menu.VerMenu_Selected = 0;
-  Menu.VerMenu_Refresh = 1;
+  Menu.Refresh = 1;
   memset(Menu.Buffer,0,sizeof(Menu.Buffer));
   Menu.CurrentMode = Menu_CurrentMode_ScrollingVertical; 
   Menu.CurrentCallback = callback;  
 }
 //####################################################################################################
-uint8_t Menu_GetScrollingSelected(void)
+uint8_t Menu_ScrollingVerticalGetSelected(void)
 {
   return Menu.VerMenu_Selected; 
 }
 //####################################################################################################
+void  Menu_AdjustValueCreateInt32(void callback(Menu_Key_t),const char *textTitle,const char *textVal,int32_t input,int32_t min,int32_t max,int32_t step)
+{
+  if(input%step!=0)
+    input = (input/step)*step;
+  LCD_Clear();
+  LCD_Puts(0,0,"-");
+  LCD_Puts(1,0,(char*)textTitle);
+  LCD_Puts(0,1,"--");
+  LCD_Puts(2,1,(char*)textVal);
+  char str[8]={0};
+  sprintf(str,"%d",input);  
+  Menu.Adjust_LCD_Pos=2+strlen(textVal);
+  LCD_Puts(Menu.Adjust_LCD_Pos,1,str);
+  Menu.Adjust_Val_int32 = input;
+  Menu.Adjust_Min_int32 = min;
+  Menu.Adjust_Max_int32 = max;
+  Menu.Adjust_Step_int32 = step;
+  Menu.CurrentMode = Menu_CurrentMode_Adjust_int32; 
+  Menu.CurrentCallback = callback;    
+}
+//####################################################################################################
+int32_t Menu_AdjustValueGetInt32(void)
+{
+  return Menu.Adjust_Val_int32;  
+}
+//####################################################################################################
+
+

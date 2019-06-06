@@ -4,7 +4,7 @@
 +++   Nima Askari
 +++   www.github.com/NimaLTD
 +++   www.instagram.com/github.NimaLTD 
-+++   Version: 1.0.0
++++   Version: 1.0.2
 */
 
 #include "lcd.h"
@@ -25,19 +25,21 @@ typedef enum
   Menu_CurrentMode_StaticText,
   Menu_CurrentMode_VolatileText,
   Menu_CurrentMode_ScrollingVertical,  
+  Menu_CurrentMode_Adjust_int32,  
   
 }Menu_CurrentMode_t;
 //####################################################################################################
-void  Menu_Init(void);
-void  Menu_Loop(void);
+void      Menu_Init(void);
+void      Menu_Loop(void);
 //####################################################################################################
-void  Menu_DeleteCurrent(void);
-void  Menu_CreateStaticText(void callback(Menu_Key_t Menu_key),const char *text);
-void  Menu_CreateVolatileText(void callback(Menu_Key_t),char *text);
+void      Menu_Delete(void);
+void      Menu_StaticTextCreate(void callback(Menu_Key_t Menu_key),const char *text);
+void      Menu_VolatileTextCreate(void callback(Menu_Key_t),char *text);
 
-void    Menu_CreateScrollingVertical(void callback(Menu_Key_t),uint8_t ItemsCnt,...);
-uint8_t Menu_GetScrollingSelected(void);
+void      Menu_ScrollingVerticalCreate(void callback(Menu_Key_t),uint8_t ItemsCnt,...);
+uint8_t   Menu_ScrollingVerticalGetSelected(void);
 
-
+void      Menu_AdjustValueCreateInt32(void callback(Menu_Key_t),const char *textTitle,const char *textVal,int32_t input,int32_t min,int32_t max,int32_t step);
+int32_t   Menu_AdjustValueGetInt32(void);
 //####################################################################################################
 #endif
