@@ -222,3 +222,8 @@ void  Menu_CreateScrollingVertical(void callback(Menu_Key_t),uint8_t ItemsCnt,..
   Menu.CurrentCallback = callback;  
 }
 //####################################################################################################
+uint8_t Menu_GetScrollingSelected(void)
+{
+  return Menu.VerMenu_Selected; 
+}
+//####################################################################################################

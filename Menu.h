@@ -34,6 +34,10 @@ void  Menu_Loop(void);
 void  Menu_DeleteCurrent(void);
 void  Menu_CreateStaticText(void callback(Menu_Key_t Menu_key),const char *text);
 void  Menu_CreateVolatileText(void callback(Menu_Key_t),char *text);
-void  Menu_CreateScrollingVertical(void callback(Menu_Key_t),uint8_t ItemsCnt,...);
+
+void    Menu_CreateScrollingVertical(void callback(Menu_Key_t),uint8_t ItemsCnt,...);
+uint8_t Menu_GetScrollingSelected(void);
+
+
 //####################################################################################################
 #endif
