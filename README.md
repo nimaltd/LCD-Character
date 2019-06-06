@@ -12,7 +12,7 @@ Please Do This ...
 <br />
 3) Config your LCD pins on "LCD_Config.h".
 <br />
-4) Call LCD_Init(16,2) and Enjoy!!
+4) Call LCD_Init() and Enjoy!!
 
 ```
 #include "LCD.h"
@@ -23,7 +23,7 @@ int main()
 {
   .
   .
-  LCD_Init(16,2); // LCD_Init(20,4);
+  LCD_Init(); 
   LCD_Puts(0,0,"TEST");
   .
   .
