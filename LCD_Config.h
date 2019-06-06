@@ -2,14 +2,9 @@
 #ifndef LCD_CONFIG_H
 #define LCD_CONFIG_H 
 
-/*
-+++   Nima Askari
-+++   www.github.com/NimaLTD
-+++   www.instagram.com/github.NimaLTD 
-+++   Version: 1.0.1
-*/
-
 #define _LCD_USE_FREERTOS 1
+#define _LCD_COLS         16
+#define _LCD_ROWS         2
 
 #define _LCD_RS_PORT      LCD_RS_GPIO_Port
 #define _LCD_RS_PIN       LCD_RS_Pin

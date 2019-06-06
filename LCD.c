@@ -9,8 +9,6 @@ typedef struct {
 	uint8_t DisplayControl;
 	uint8_t DisplayFunction;
 	uint8_t DisplayMode;
-	uint8_t Rows;
-	uint8_t Cols;
 	uint8_t currentX;
 	uint8_t currentY;
   
@@ -79,7 +77,7 @@ void  LCD_Delay_ms(uint8_t  ms)
   #endif  
 }
 //############################################################################################
-void LCD_Init(uint8_t cols, uint8_t rows)
+void LCD_Init(void)
 {	
   GPIO_InitTypeDef  gpio;
   gpio.Mode = GPIO_MODE_OUTPUT_PP;
@@ -103,14 +101,11 @@ void LCD_Init(uint8_t cols, uint8_t rows)
   
 	while(HAL_GetTick()<200)
     LCD_Delay_ms(1);
-	/* Set LCD width and height */
-	LCD_Opts.Rows = rows;
-	LCD_Opts.Cols = cols;
 	/* Set cursor pointer to beginning for LCD */
 	LCD_Opts.currentX = 0;
 	LCD_Opts.currentY = 0;
 	LCD_Opts.DisplayFunction = LCD_4BITMODE | LCD_5x8DOTS | LCD_1LINE;
-	if (rows > 1)
+	if (_LCD_ROWS > 1)
 		LCD_Opts.DisplayFunction |= LCD_2LINE;
 	/* Try to set 4bit mode */
 	LCD_Cmd4bit(0x03);
@@ -147,7 +142,7 @@ void LCD_Puts(uint8_t x, uint8_t y, char* str)
 	LCD_CursorSet(x, y);
 	while (*str)
   {
-		if (LCD_Opts.currentX >= LCD_Opts.Cols)
+		if (LCD_Opts.currentX >= _LCD_COLS)
     {
 			LCD_Opts.currentX = 0;
 			LCD_Opts.currentY++;
@@ -261,7 +256,7 @@ static void LCD_Cmd4bit(uint8_t cmd)
 static void LCD_CursorSet(uint8_t col, uint8_t row)
 {
 	uint8_t row_offsets[] = {0x00, 0x40, 0x14, 0x54};
-	if (row >= LCD_Opts.Rows)
+	if (row >= _LCD_ROWS)
 		row = 0;
 	LCD_Opts.currentX = col;
 	LCD_Opts.currentY = row;

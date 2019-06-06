@@ -1,11 +1,18 @@
 
 #ifndef LCD_H
 #define LCD_H 
+/*
++++   Nima Askari
++++   www.github.com/NimaLTD
++++   www.instagram.com/github.NimaLTD 
++++   Version: 1.1.0
+*/
+
 
 #include "gpio.h"
 
 
-void LCD_Init(uint8_t cols, uint8_t rows);
+void LCD_Init(void);
 void LCD_DisplayOn(void);
 void LCD_DisplayOff(void);
 void LCD_Clear(void);
