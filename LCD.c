@@ -246,10 +246,11 @@ static void LCD_Data(uint8_t data)
 //############################################################################################
 static void LCD_Cmd4bit(uint8_t cmd)
 {
-	HAL_GPIO_WritePin(_LCD_D7_PORT, _LCD_D7_PIN, (GPIO_PinState)(cmd & 0x08));
-	HAL_GPIO_WritePin(_LCD_D6_PORT, _LCD_D6_PIN, (GPIO_PinState)(cmd & 0x04));
-	HAL_GPIO_WritePin(_LCD_D5_PORT, _LCD_D5_PIN, (GPIO_PinState)(cmd & 0x02));
+	HAL_GPIO_WritePin(_LCD_D7_PORT, _LCD_D7_PIN, (GPIO_PinState)((cmd & 0x08) >> 3));
+	HAL_GPIO_WritePin(_LCD_D6_PORT, _LCD_D6_PIN, (GPIO_PinState)((cmd & 0x04) >> 2));
+	HAL_GPIO_WritePin(_LCD_D5_PORT, _LCD_D5_PIN, (GPIO_PinState)((cmd & 0x02) >> 1));
 	HAL_GPIO_WritePin(_LCD_D4_PORT, _LCD_D4_PIN, (GPIO_PinState)(cmd & 0x01));
+	
 	LCD_E_BLINK;
 }
 //############################################################################################
