@@ -1,9 +1,11 @@
 
-#include "menu.h"
-#include "menu_config.h"
-#include "lcd_config.h"
+#include "Menu.h"
+#include "LCD_Config.h"
 #include <string.h>
 #include <stdarg.h>
+
+#if _LCD_USE_MENU_LIB
+#include "Menu_Config.h"
 //####################################################################################################
 typedef struct
 {
@@ -295,4 +297,4 @@ int32_t Menu_AdjustValueGetInt32(void)
 }
 //####################################################################################################
 
-
+#endif // _LCD_USE_MENU_LIB
