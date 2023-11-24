@@ -26,7 +26,7 @@ void LCD_ScrollRight(void);
 void LCD_CreateChar(uint8_t location, uint8_t* data);
 void LCD_PutCustom(uint8_t x, uint8_t y, uint8_t location);
 void LCD_Put(uint8_t Data);
-
+void LCD_Read_str(char* str, uint8_t x, uint8_t y,uint8_t length);
 
 #endif
 
