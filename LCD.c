@@ -19,6 +19,12 @@ static void LCD_Cmd(uint8_t cmd);
 static void LCD_Cmd4bit(uint8_t cmd);
 static void LCD_Data(uint8_t data);
 static void LCD_CursorSet(uint8_t col, uint8_t row);
+
+static uint8_t LCD_Read_char(void);
+static uint8_t LCD_Data_read(void);
+static void LCD_setpin_in(void);
+static void LCD_setpin_out(void);
+
 //############################################################################################
 /* Private variable */
 static LCD_Options_t LCD_Opts;
@@ -26,6 +32,8 @@ static LCD_Options_t LCD_Opts;
 /* Pin definitions */
 #define LCD_RS_LOW              HAL_GPIO_WritePin(_LCD_RS_PORT, _LCD_RS_PIN,GPIO_PIN_RESET)
 #define LCD_RS_HIGH             HAL_GPIO_WritePin(_LCD_RS_PORT, _LCD_RS_PIN,GPIO_PIN_SET)
+#define LCD_RW_LOW              HAL_GPIO_WritePin(_LCD_RW_PORT, _LCD_RW_PIN,GPIO_PIN_RESET)
+#define LCD_RW_HIGH             HAL_GPIO_WritePin(_LCD_RW_PORT, _LCD_RW_PIN,GPIO_PIN_SET)
 #define LCD_E_LOW               HAL_GPIO_WritePin(_LCD_E_PORT,  _LCD_E_PIN,GPIO_PIN_RESET)
 #define LCD_E_HIGH              HAL_GPIO_WritePin(_LCD_E_PORT,  _LCD_E_PIN,GPIO_PIN_SET)
 #define LCD_E_BLINK             LCD_E_HIGH; LCD_Delay_us(50); LCD_E_LOW; LCD_Delay_us(50)
@@ -90,14 +98,8 @@ void LCD_Init(void)
   HAL_GPIO_Init(_LCD_E_PORT,&gpio);
   gpio.Pin = _LCD_RW_PIN;
   HAL_GPIO_Init(_LCD_RW_PORT,&gpio);
-  gpio.Pin = _LCD_D4_PIN;
-  HAL_GPIO_Init(_LCD_D4_PORT,&gpio);
-  gpio.Pin = _LCD_D5_PIN;
-  HAL_GPIO_Init(_LCD_D5_PORT,&gpio);
-  gpio.Pin = _LCD_D6_PIN;
-  HAL_GPIO_Init(_LCD_D6_PORT,&gpio);
-  gpio.Pin = _LCD_D7_PIN;
-  HAL_GPIO_Init(_LCD_D7_PORT,&gpio);
+
+  LCD_setpin_out();
   
 	while(HAL_GetTick()<200)
     LCD_Delay_ms(1);
@@ -224,6 +226,28 @@ void LCD_CreateChar(uint8_t location, uint8_t *data)
 	}
 }
 //############################################################################################
+void LCD_Read_str(char* str,uint8_t x, uint8_t y,uint8_t length)
+{
+	LCD_CursorSet(x, y);	
+
+	while (length)
+  {
+		if (LCD_Opts.currentX >= _LCD_COLS)
+    {
+			LCD_Opts.currentX = 0;
+			LCD_Opts.currentY++;
+			LCD_CursorSet(LCD_Opts.currentX, LCD_Opts.currentY);
+		}
+		else
+    {
+			*str=(char)LCD_Read_char();
+			LCD_Opts.currentX++;
+		}
+		str++;
+		length--;
+	}
+}
+//############################################################################################
 void LCD_PutCustom(uint8_t x, uint8_t y, uint8_t location)
 {
 	LCD_CursorSet(x, y);
@@ -242,6 +266,72 @@ static void LCD_Data(uint8_t data)
 	LCD_RS_HIGH;
 	LCD_Cmd4bit(data >> 4);
 	LCD_Cmd4bit(data & 0x0F);
+}
+//############################################################################################
+static uint8_t LCD_Read_char(void)
+{
+	LCD_setpin_in();
+	LCD_RS_HIGH;
+
+	uint8_t data=LCD_Data_read()<<4;
+	data|=LCD_Data_read();
+	
+	LCD_setpin_out();	
+	return data; 
+}
+//############################################################################################
+static uint8_t LCD_Data_read(void)
+{
+	LCD_E_HIGH; 
+	LCD_Delay_us(50); 
+	
+	uint8_t data =HAL_GPIO_ReadPin(_LCD_D7_PORT, _LCD_D7_PIN)<<3;
+	data|=HAL_GPIO_ReadPin(_LCD_D6_PORT, _LCD_D6_PIN)<<2;
+	data|=HAL_GPIO_ReadPin(_LCD_D5_PORT, _LCD_D5_PIN)<<1;
+	data|=HAL_GPIO_ReadPin(_LCD_D4_PORT, _LCD_D4_PIN)<<0;
+	
+	LCD_E_LOW; 
+	LCD_Delay_us(50);
+	
+	return data;
+}
+//############################################################################################
+static void LCD_setpin_in(void)
+{
+	LCD_RW_HIGH;
+	
+  GPIO_InitTypeDef  gpio;
+  gpio.Mode = GPIO_MODE_INPUT;
+  gpio.Speed = GPIO_SPEED_FREQ_HIGH;
+  gpio.Pull = GPIO_NOPULL;
+  
+  gpio.Pin = _LCD_D4_PIN;
+  HAL_GPIO_Init(_LCD_D4_PORT,&gpio);
+  gpio.Pin = _LCD_D5_PIN;
+  HAL_GPIO_Init(_LCD_D5_PORT,&gpio);
+  gpio.Pin = _LCD_D6_PIN;
+  HAL_GPIO_Init(_LCD_D6_PORT,&gpio);
+  gpio.Pin = _LCD_D7_PIN;
+  HAL_GPIO_Init(_LCD_D7_PORT,&gpio);
+}
+//############################################################################################
+static void LCD_setpin_out(void)
+{
+	LCD_RW_LOW;
+	
+  GPIO_InitTypeDef  gpio;
+  gpio.Mode = GPIO_MODE_OUTPUT_PP;
+  gpio.Speed = GPIO_SPEED_FREQ_HIGH;
+  gpio.Pull = GPIO_NOPULL;
+  
+  gpio.Pin = _LCD_D4_PIN;
+  HAL_GPIO_Init(_LCD_D4_PORT,&gpio);
+  gpio.Pin = _LCD_D5_PIN;
+  HAL_GPIO_Init(_LCD_D5_PORT,&gpio);
+  gpio.Pin = _LCD_D6_PIN;
+  HAL_GPIO_Init(_LCD_D6_PORT,&gpio);
+  gpio.Pin = _LCD_D7_PIN;
+  HAL_GPIO_Init(_LCD_D7_PORT,&gpio);
 }
 //############################################################################################
 static void LCD_Cmd4bit(uint8_t cmd)
